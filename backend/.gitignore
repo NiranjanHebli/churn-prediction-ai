@@ -1,0 +1,12 @@
+# Local environment variable configs
+.env
+
+# Python build & cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.ipynb_checkpoints/
+
+# System files
+.DS_Store
