@@ -1,21 +1,86 @@
-# Node.js with React
-# Build a Node.js project that uses React.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
-
 trigger:
-- dev
+  branches:
+    include:
+      - dev
+  paths:
+    include:
+      - frontend/*
 
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '20.x'
-  displayName: 'Install Node.js'
+variables:
+  frontendFolder: 'frontend'
+  buildOutputFolder: 'frontend/dist'
+  azureServiceConnection: 'Azure-Deploy-Conn'
+  appName: 'churn-prediction-ai'
 
-- script: |
-    npm install
-    npm run build
-  displayName: 'npm install and build'
+stages:
+# ==========================================
+# STAGE 1: BUILD THE FRONTEND & INJECT SECRETS
+# ==========================================
+- stage: BuildStage
+  displayName: 'Build Frontend'
+  jobs:
+  - job: BuildJob
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '20.x'
+      displayName: 'Install Node.js'
+
+    - script: |
+        npm install
+        npm run build
+      workingDirectory: $(frontendFolder)
+      displayName: 'Build frontend with secure secrets'
+      # ------------------------------------------------------------
+      # SECURE MAPPING: Safely pulls from your locked DevOps UI variables
+      # ------------------------------------------------------------
+      env:
+        VITE_AZURE_ML_URL: $(AZURE_ML_URL)
+        VITE_AZURE_ML_KEY: $(AZURE_ML_KEY)
+
+    - task: ArchiveFiles@2
+      inputs:
+        rootFolderOrFile: '$(buildOutputFolder)'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/frontend.zip'
+        replaceExistingArchive: true
+      displayName: 'Zip dist folder'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/frontend.zip'
+        ArtifactName: 'frontend-drop'
+        publishLocation: 'Container'
+      displayName: 'Publish frontend artifact'
+
+# ==========================================
+# STAGE 2: DEPLOY TO LINUX APP SERVICE
+# ==========================================
+- stage: DeployStage
+  displayName: 'Deploy to Azure'
+  dependsOn: BuildStage
+  condition: succeeded()
+  jobs:
+  - job: DeployJob 
+    steps:
+    - task: DownloadBuildArtifacts@1
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'frontend-drop'
+        downloadPath: '$(System.ArtifactsDirectory)'
+      displayName: 'Download Build Artifact'
+
+    - task: AzureWebApp@1
+      inputs:
+        azureSubscription: '$(azureServiceConnection)'
+        appType: 'webAppLinux' 
+        appName: '$(appName)'
+        package: '$(System.ArtifactsDirectory)/frontend-drop/frontend.zip'
+        # Ensures your SPA React client-side routing acts normally on refreshes
+        appSettings: '-StartupCommand "pm2 serve /home/site/wwwroot --no-daemon --spa"' 
+      displayName: 'Deploy to Azure Web App'
