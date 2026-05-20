@@ -3,14 +3,11 @@ const HAS_CLOUD_CONFIG = !!(import.meta.env.VITE_AZURE_ML_URL && import.meta.env
 
 export const USE_CLOUD = HAS_CLOUD_CONFIG;
 
-// Select Cloud or Local URL based on environment config availability
-export const TARGET_URL = USE_CLOUD
-  ? (typeof window !== 'undefined' && window.location.hostname === 'localhost'
-      ? '/api/score'
-      : import.meta.env.VITE_AZURE_ML_URL)
-  : (typeof window !== 'undefined' && window.location.hostname === 'localhost'
-      ? '/api/score-local'
-      : 'http://127.0.0.1:8000/score');
+// Always use the proxy path for cloud:
+//   Dev  → Vite proxy forwards /api/score to Azure ML
+//   Prod → Vercel serverless function at /api/score proxies to Azure ML
+// This avoids CORS since the browser never calls Azure ML directly.
+export const TARGET_URL = USE_CLOUD ? '/api/score' : '/api/score-local';
 
 export const API_KEY = import.meta.env.VITE_AZURE_ML_KEY || '';
 

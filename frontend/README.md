@@ -58,8 +58,6 @@ VITE_AZURE_ML_URL=https://<your-endpoint>.inference.ml.azure.com/score
 VITE_AZURE_ML_KEY=<your-primary-key>
 ```
 
-The `.env` file is listed in `.gitignore` and must never be committed.
-
 ---
 
 ## Azure ML Payload Format
