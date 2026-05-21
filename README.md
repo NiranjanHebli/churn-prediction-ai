@@ -14,7 +14,7 @@ A full-stack machine learning application that predicts customer churn in real t
 
 ## Problem Statement
 
-Customer churn is one of the most costly problems in subscription-based businesses. Companies often identify departing customers only after they have already cancelled, leaving little opportunity for intervention. Proactive retention requires a system that can score every customer before churn occurs — using existing data that businesses already collect, such as contract type, tenure, and monthly spend.
+Customer churn is one of the most costly problems in subscription-based businesses. Companies often identify departing customers only after they have already cancelled, leaving little opportunity for intervention. Proactive retention requires a system that can score every customer before churn occurs - using existing data that businesses already collect, such as contract type, tenure, and monthly spend.
 
 ---
 
@@ -69,14 +69,14 @@ The tool is designed for non-technical users: a rep enters customer details into
 
 ## Future Scope
 
-- **Batch prediction** — Allow upload of a CSV file to score multiple customers at once and export results with risk tiers.
-- **Probability scores from model** — Replace the heuristic risk score with the actual class probability returned by the Random Forest, providing a more calibrated confidence measure.
-- **SHAP explainability** — Integrate SHAP values into the API response so the UI can display exact per-feature contribution instead of rule-based factor chips.
-- **Dashboard analytics** — Add a summary view showing churn rate trends, average risk scores, and intervention outcomes over time across all scored customers.
-- **CRM integration** — Connect to Salesforce or HubSpot to automatically create tasks or update contact records when a high-risk prediction is made.
-- **Multi-tenant support** — Extend the backend to support multiple business accounts, each with their own model version and endpoint configuration.
-- **Model retraining pipeline** — Automate periodic retraining using Azure ML pipelines when new labelled data becomes available, with automated evaluation gating before deployment.
-- **Authentication** — Add identity-based access control so only authorised users can access predictions and history.
+- **Batch prediction** - Allow upload of a CSV file to score multiple customers at once and export results with risk tiers.
+- **Probability scores from model** - Replace the heuristic risk score with the actual class probability returned by the Random Forest, providing a more calibrated confidence measure.
+- **SHAP explainability** - Integrate SHAP values into the API response so the UI can display exact per-feature contribution instead of rule-based factor chips.
+- **Dashboard analytics** - Add a summary view showing churn rate trends, average risk scores, and intervention outcomes over time across all scored customers.
+- **CRM integration** - Connect to Salesforce or HubSpot to automatically create tasks or update contact records when a high-risk prediction is made.
+- **Multi-tenant support** - Extend the backend to support multiple business accounts, each with their own model version and endpoint configuration.
+- **Model retraining pipeline** - Automate periodic retraining using Azure ML pipelines when new labelled data becomes available, with automated evaluation gating before deployment.
+- **Authentication** - Add identity-based access control so only authorised users can access predictions and history.
 
 ---
 

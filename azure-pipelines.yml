@@ -11,7 +11,7 @@ pool:
 
 variables:
   frontendFolder: 'frontend'
-  buildOutputFolder: 'frontend/dist'
+  buildOutputFolder: 'frontend/prod-out'
   azureServiceConnection: 'Azure-Deploy-Conn'
   appName: 'churn-prediction-ai'
 
@@ -32,14 +32,17 @@ stages:
     - script: |
         npm install
         npm run build
+        mkdir -p prod-out
+        cp -r dist prod-out/
+        cp server.js prod-out/
+        cp package.json prod-out/
+        cd prod-out
+        npm install --omit=dev
       workingDirectory: $(frontendFolder)
-      displayName: 'Build frontend with secure secrets'
-      # ------------------------------------------------------------
-      # SECURE MAPPING: Safely pulls from your locked DevOps UI variables
-      # ------------------------------------------------------------
+      displayName: 'Build frontend and package production dependencies'
       env:
-        VITE_AZURE_ML_URL: $(AZURE_ML_URL)
-        VITE_AZURE_ML_KEY: $(AZURE_ML_KEY)
+        VITE_AZURE_ML_URL: 'production'
+        VITE_AZURE_ML_KEY: 'production'
 
     - task: ArchiveFiles@2
       inputs:
@@ -81,6 +84,6 @@ stages:
         appType: 'webAppLinux' 
         appName: '$(appName)'
         package: '$(System.ArtifactsDirectory)/frontend-drop/frontend.zip'
-        # Ensures your SPA React client-side routing acts normally on refreshes
-        appSettings: '-StartupCommand "pm2 serve /home/site/wwwroot --no-daemon --spa"' 
+        startUpCommand: 'node server.js'
+        appSettings: '-AZURE_ML_URL "$(AZURE_ML_URL)" -AZURE_ML_KEY "$(AZURE_ML_KEY)"' 
       displayName: 'Deploy to Azure Web App'
