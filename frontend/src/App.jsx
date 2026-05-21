@@ -47,32 +47,26 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState(() => loadHistory());
   const [showHistory, setShowHistory] = useState(false);
   const resultRef = useRef(null);
-
-  useEffect(() => {
-    setHistory(loadHistory());
-  }, []);
-
-  // Auto-compute TotalCharge from Tenure x Monthly
-  useEffect(() => {
-    const tenure = parseFloat(formData.tenure);
-    const monthly = parseFloat(formData.monthlyCharge);
-    if (!isNaN(tenure) && !isNaN(monthly) && tenure > 0 && monthly > 0) {
-      setFormData((prev) => ({
-        ...prev,
-        totalCharge: (tenure * monthly).toFixed(2),
-      }));
-    }
-  }, [formData.tenure, formData.monthlyCharge]);
 
   const errors = validate(formData);
   const isFormValid = Object.keys(errors).length === 0;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => {
+      const next = { ...prev, [name]: value };
+      if (name === 'tenure' || name === 'monthlyCharge') {
+        const tenure = parseFloat(next.tenure);
+        const monthly = parseFloat(next.monthlyCharge);
+        if (!isNaN(tenure) && !isNaN(monthly) && tenure > 0 && monthly > 0) {
+          next.totalCharge = (tenure * monthly).toFixed(2);
+        }
+      }
+      return next;
+    });
     setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
@@ -226,31 +220,7 @@ function App() {
             Enter customer data to get an instant AI-powered churn prediction with
             personalized retention strategies and risk analysis.
           </p>
-          <div className="hero-stats">
-            <div className="hero-stat">
-              <span className="hero-stat-value">6</span>
-              <span className="hero-stat-label">Input Features</span>
-            </div>
-            <div className="hero-stat-divider" />
-            <div className="hero-stat">
-              <span className="hero-stat-value">RF</span>
-              <span className="hero-stat-label">Algorithm</span>
-            </div>
-            <div className="hero-stat-divider" />
-            <div className="hero-stat">
-              <span className="hero-stat-value">~1s</span>
-              <span className="hero-stat-label">Response Time</span>
-            </div>
-            {history.length > 0 && (
-              <>
-                <div className="hero-stat-divider" />
-                <div className="hero-stat">
-                  <span className="hero-stat-value">{history.length}</span>
-                  <span className="hero-stat-label">Predictions</span>
-                </div>
-              </>
-            )}
-          </div>
+
         </div>
       </section>
 

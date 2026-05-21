@@ -32,7 +32,7 @@ app.post('/api/score', async (req, res) => {
 
     const data = await response.json();
     res.status(response.status).json(data);
-  } catch (err) {
+  } catch {
     res.status(502).json({ error: 'Failed to reach Azure ML endpoint' });
   }
 });
